@@ -1,0 +1,886 @@
+<title>Project Topic Checker</title>
+<meta name="description" content="Online Project Topic Availability Checker and Management System - live demo">
+<style>
+:root {
+  --primary: #1d5bd6; --primary-dark: #1647a8; --on-primary: #ffffff;
+  --navy: #0f1e3d; --navy-2: #152a55; --nav-text: #c7d2ea; --nav-label: #6d7fa8; --nav-active: #1c3a86;
+  --ground-a: #e3eef9; --ground-b: #eef3f9;
+  --text: #1d2433; --muted: #5b6475; --border: #e3e8f0; --row: #eef1f6; --row-hover: #f8faff;
+  --card: #ffffff; --field: #ffffff; --field-border: #d5dce8; --soft: #eef2f8; --soft-hover: #e1e7f1;
+  --green: #1e8e5a; --green-bg: #dff5ea; --green-ink: #145c3b; --green-line: #b8e6cf;
+  --red: #c62845; --red-bg: #fde4e8; --red-ink: #8c1b31; --red-line: #f5c0ca;
+  --amber: #a86b00; --amber-bg: #fff1d6; --amber-ink: #6e4700; --amber-line: #f1d9a3;
+  --info-bg: #e3edff; --info-ink: #1d3f86; --info-line: #c4d6fb;
+  --violet: #5b34b8; --violet-bg: #ece3ff;
+  --logout-bg: #f8d3da; --logout-ink: #b3203c;
+  --shadow: 0 6px 22px rgba(20, 40, 90, 0.08);
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --primary: #4d86f0; --primary-dark: #3a72dc; --on-primary: #ffffff;
+    --navy: #0a1428; --navy-2: #0f1d3b; --nav-active: #213f8f;
+    --ground-a: #0f1726; --ground-b: #131c2e;
+    --text: #e4e9f3; --muted: #9aa6bd; --border: #26324a; --row: #202b41; --row-hover: #1b263b;
+    --card: #172136; --field: #111a2b; --field-border: #2c3953; --soft: #22304a; --soft-hover: #2b3a58;
+    --green: #4fd192; --green-bg: #133526; --green-ink: #a8ecc9; --green-line: #1f5a3f;
+    --red: #ff7d93; --red-bg: #3a1720; --red-ink: #ffc2cd; --red-line: #6a2635;
+    --amber: #f3b54a; --amber-bg: #3a2a0c; --amber-ink: #fbdc9c; --amber-line: #6a4c14;
+    --info-bg: #182a4d; --info-ink: #b9cffb; --info-line: #2a4476;
+    --violet: #b9a0ff; --violet-bg: #2a2150;
+    --logout-bg: #4a1a26; --logout-ink: #ffb3c1;
+    --shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --primary: #4d86f0; --primary-dark: #3a72dc; --on-primary: #ffffff;
+  --navy: #0a1428; --navy-2: #0f1d3b; --nav-active: #213f8f;
+  --ground-a: #0f1726; --ground-b: #131c2e;
+  --text: #e4e9f3; --muted: #9aa6bd; --border: #26324a; --row: #202b41; --row-hover: #1b263b;
+  --card: #172136; --field: #111a2b; --field-border: #2c3953; --soft: #22304a; --soft-hover: #2b3a58;
+  --green: #4fd192; --green-bg: #133526; --green-ink: #a8ecc9; --green-line: #1f5a3f;
+  --red: #ff7d93; --red-bg: #3a1720; --red-ink: #ffc2cd; --red-line: #6a2635;
+  --amber: #f3b54a; --amber-bg: #3a2a0c; --amber-ink: #fbdc9c; --amber-line: #6a4c14;
+  --info-bg: #182a4d; --info-ink: #b9cffb; --info-line: #2a4476;
+  --violet: #b9a0ff; --violet-bg: #2a2150;
+  --logout-bg: #4a1a26; --logout-ink: #ffb3c1;
+  --shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+body {
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 15px;
+  color: var(--text); background: linear-gradient(135deg, var(--ground-a) 0%, var(--ground-b) 60%, var(--ground-a) 100%);
+  min-height: 100vh;
+}
+a { color: var(--primary); text-decoration: none; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent); outline-offset: 2px; }
+
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  display: flex; align-items: center; gap: 14px; height: 70px; padding: 0 28px;
+  background: var(--card); border-bottom: 1px solid var(--border);
+}
+.brand { display: flex; align-items: center; gap: 12px; color: var(--text); background: none; border: 0; cursor: pointer; padding: 0; text-align: left; }
+.brand-logo { width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(135deg, #2166e0, #1446a6); color: #fff; font-weight: 700; font-size: 20px; flex-shrink: 0; }
+.brand-title { display: block; font-weight: 700; font-size: 18px; }
+.brand-sub { display: block; font-size: 12px; color: var(--muted); }
+.user-box { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.user-info { text-align: right; line-height: 1.25; }
+.user-info strong { display: block; font-size: 14px; }
+.user-info small { color: var(--muted); font-size: 12px; }
+.menu-toggle { display: none; border: 0; background: none; font-size: 22px; cursor: pointer; }
+
+.layout { display: flex; min-height: calc(100vh - 70px); }
+.sidebar { width: 250px; flex-shrink: 0; background: linear-gradient(180deg, var(--navy), var(--navy-2)); padding: 22px 14px; display: flex; flex-direction: column; }
+.menu-label { color: var(--nav-label); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; padding: 0 12px 12px; }
+.nav-link { display: flex; align-items: center; gap: 12px; width: 100%; color: var(--nav-text); padding: 12px 14px; border-radius: 10px; margin-bottom: 6px; font-size: 15px; background: none; border: 0; cursor: pointer; text-align: left; }
+.nav-link:hover { background: rgba(255,255,255,.06); color: #fff; }
+.nav-link.active { background: var(--nav-active); color: #fff; font-weight: 600; }
+.nav-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: .55; }
+.nav-link.active .nav-dot { opacity: 1; background: #8fb4ff; }
+.side-foot { margin-top: auto; padding: 14px 12px 0; border-top: 1px solid rgba(255,255,255,.08); color: var(--nav-label); font-size: 12px; line-height: 1.5; }
+.side-foot button { background: none; border: 0; color: #9fbaf5; cursor: pointer; padding: 0; font-size: 12px; text-decoration: underline; }
+
+.content { flex: 1; padding: 30px 34px; min-width: 0; }
+.page-head h1 { margin: 0 0 4px; font-size: 28px; text-wrap: balance; }
+.page-head p { margin: 0 0 24px; color: var(--muted); }
+.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px 26px; margin-bottom: 22px; border: 1px solid var(--border); }
+.card h2 { margin: 0 0 6px; font-size: 20px; }
+.card .sub { margin: 0 0 16px; color: var(--muted); }
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.card-head h2 { margin: 0; }
+.narrow { max-width: 860px; margin-left: auto; margin-right: auto; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 18px; margin-bottom: 22px; }
+.stat { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 22px; border: 1px solid var(--border); }
+.stat-icon { width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center; margin-bottom: 14px; }
+.stat-icon svg { width: 22px; height: 22px; }
+.stat-num { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat-label { color: var(--muted); font-size: 14px; }
+.i-blue { background: var(--info-bg); color: var(--primary); } .i-green { background: var(--green-bg); color: var(--green); }
+.i-red { background: var(--red-bg); color: var(--red); } .i-amber { background: var(--amber-bg); color: var(--amber); } .i-violet { background: var(--violet-bg); color: var(--violet); }
+
+.form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.form-row > .grow { flex: 1; min-width: 200px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+.input { width: 100%; padding: 12px 14px; font-size: 15px; border: 1px solid var(--field-border); border-radius: 10px; background: var(--field); color: var(--text); }
+.input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent); }
+.input.is-invalid { border-color: var(--red); }
+textarea.input { min-height: 90px; resize: vertical; }
+.field-error { color: var(--red); font-size: 13px; margin-top: 5px; }
+.hint { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.search-wrap { position: relative; }
+.search-wrap svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--muted); }
+.search-wrap .input { padding-left: 38px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 20px; border-radius: 10px; border: 0; cursor: pointer; font-weight: 600; font-size: 14px; white-space: nowrap; background: var(--primary); color: var(--on-primary); }
+.btn:hover { background: var(--primary-dark); }
+.btn-sm { padding: 7px 14px; font-size: 13px; border-radius: 8px; }
+.btn-green { background: var(--green); color: #fff; } .btn-green:hover { filter: brightness(.92); background: var(--green); }
+.btn-red { background: var(--red); color: #fff; } .btn-red:hover { filter: brightness(.92); background: var(--red); }
+.btn-light { background: var(--soft); color: var(--text); } .btn-light:hover { background: var(--soft-hover); }
+.btn-logout { background: var(--logout-bg); color: var(--logout-ink); padding: 9px 18px; } .btn-logout:hover { background: var(--logout-bg); filter: brightness(.95); }
+.btn-block { width: 100%; }
+.link-btn { background: none; border: 0; color: var(--primary); cursor: pointer; padding: 0; font-weight: 600; }
+
+.alert { padding: 14px 18px; border-radius: 10px; margin-bottom: 18px; border: 1px solid transparent; }
+.alert-success { background: var(--green-bg); color: var(--green-ink); border-color: var(--green-line); }
+.alert-error { background: var(--red-bg); color: var(--red-ink); border-color: var(--red-line); }
+.alert-info { background: var(--info-bg); color: var(--info-ink); border-color: var(--info-line); }
+.result { border-radius: var(--radius); padding: 20px 24px; margin-bottom: 22px; border: 1px solid transparent; }
+.result h3 { margin: 0 0 8px; font-size: 17px; }
+.result p { margin: 0 0 6px; }
+.result ul { margin: 8px 0 0; padding-left: 20px; }
+.result-available { background: var(--green-bg); border-color: var(--green-line); color: var(--green-ink); }
+.result-similar { background: var(--amber-bg); border-color: var(--amber-line); color: var(--amber-ink); }
+.result-taken, .result-pending, .result-invalid { background: var(--red-bg); border-color: var(--red-line); color: var(--red-ink); }
+.result-exists { background: var(--info-bg); border-color: var(--info-line); color: var(--info-ink); }
+.result form { margin-top: 14px; color: var(--text); }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-size: 12px; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); padding: 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 14px 12px; border-bottom: 1px solid var(--row); vertical-align: middle; font-size: 14px; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: var(--row-hover); }
+.t-title { font-weight: 600; }
+.t-desc { color: var(--muted); font-size: 12.5px; margin-top: 3px; }
+.empty { text-align: center; color: var(--muted); padding: 28px; }
+.muted { color: var(--muted); }
+.badge { display: inline-block; padding: 4px 11px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.b-available, .b-approved { background: var(--green-bg); color: var(--green); }
+.b-selected, .b-rejected { background: var(--red-bg); color: var(--red); }
+.b-pending { background: var(--amber-bg); color: var(--amber); }
+.b-new { background: var(--violet-bg); color: var(--violet); }
+.b-existing { background: var(--info-bg); color: var(--info-ink); }
+.toolbar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.toolbar .search-wrap { flex: 1; min-width: 200px; }
+.toolbar select { width: 190px; max-width: 100%; }
+.action-cell { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.remark { padding: 7px 10px; font-size: 13px; min-width: 150px; flex: 1; }
+
+.auth-page { display: grid; place-items: center; min-height: 100vh; padding-block: 24px; padding-inline: 16px; }
+.auth-card { width: 100%; max-width: 440px; }
+.auth-card.wide { max-width: 640px; }
+.auth-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+.auth-foot { text-align: center; margin-top: 16px; color: var(--muted); font-size: 14px; }
+.demo-box { background: var(--soft); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--muted); margin-top: 16px; line-height: 1.7; }
+.demo-box code { background: var(--card); padding: 1px 6px; border-radius: 5px; color: var(--text); }
+.demo-box .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pw-wrap { position: relative; }
+.pw-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: 0; background: none; cursor: pointer; color: var(--muted); font-size: 13px; }
+
+.report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.report-grid .card { margin-bottom: 22px; }
+.bar { height: 10px; background: var(--soft); border-radius: 10px; overflow: hidden; margin-top: 6px; }
+.bar > span { display: block; height: 100%; background: var(--primary); border-radius: 10px; }
+.kv { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--row); font-variant-numeric: tabular-nums; }
+.kv:last-child { border-bottom: 0; }
+
+.modal-back { position: fixed; inset: 0; background: rgba(8, 15, 30, .55); display: grid; place-items: center; z-index: 50; padding: 16px; }
+.modal { background: var(--card); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 420px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+.modal p { margin: 0 0 18px; }
+.modal .row { display: flex; gap: 10px; justify-content: flex-end; }
+
+@media (max-width: 900px) {
+  .menu-toggle { display: block; }
+  .sidebar { position: fixed; top: calc(70px + env(safe-area-inset-top, 0px)); bottom: 0; left: -260px; z-index: 30; transition: left .2s; }
+  .sidebar.open { left: 0; }
+  .content { padding: 22px 16px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .brand-sub, .user-info { display: none; }
+  .topbar { padding: 0 16px; }
+  .page-head h1 { font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { .sidebar { transition: none; } }
+</style>
+
+<div id="app"></div>
+<div id="modal" hidden></div>
+
+<script>
+/* Online Project Topic Availability Checker - browser demo.
+   Same rules as the PHP + MySQL version; data is stored in this browser (localStorage). */
+
+const APP_NAME = 'Project Topic Checker';
+const TAGLINE = 'Online Project Topic Availability Checker';
+const DEPARTMENTS = ['Computer Science', 'Information Technology', 'BCA', 'MCA', 'Electronics', 'Mechanical', 'Civil'];
+const MAX_PENDING = 3;
+const KEY = 'ptc-demo-v1';
+const STOPWORDS = new Set(['a','an','the','of','for','and','in','on','to','with','using','by','based','via','system','systems','online','website','web','site','app','application','management','portal','project','platform','software','tool','digital','smart']);
+
+const ICONS = {
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M17 11a3 3 0 1 0 0-6M22 21a6 6 0 0 0-4-5.6"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'
+};
+
+/* ---------- Storage ---------- */
+let db = null;
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { /* storage blocked: keep in memory */ } }
+function restore() { try { const s = localStorage.getItem(KEY); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+
+async function hash(text) {
+  try {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('ptc:' + text));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (e) { return 'plain:' + text; }
+}
+
+function stamp(offsetHours) { return new Date(Date.now() - offsetHours * 3600e3).toISOString(); }
+
+async function seed() {
+  const users = [
+    [1, 'Administrator', 'admin', 'admin@college.edu', '', 'Computer Science', 'admin123', 'admin'],
+    [2, 'Student User', 'student', 'student@college.edu', 'CS001', 'Computer Science', 'student123', 'student'],
+    [3, 'Rahul Sharma', 'rahul', 'rahul@college.edu', 'CS002', 'Computer Science', 'rahul123', 'student'],
+    [4, 'Priya Patel', 'priya', 'priya@college.edu', 'CS003', 'Computer Science', 'priya123', 'student']
+  ];
+  const topics = [
+    ['Online Library Management System', 'A web-based system for managing library books and students', 'Selected', 3],
+    ['Online Hospital Management System', 'System for managing hospital records and appointments', 'Available', null],
+    ['Student Attendance Management System', 'Application for managing student attendance', 'Available', null],
+    ['Online Food Ordering System', 'Website for ordering food online from restaurants', 'Selected', 4],
+    ['Hostel Management System', 'Manage hostel rooms, fees and student allotment', 'Available', null],
+    ['College Event Management System', 'Plan, publish and register for college events', 'Available', null],
+    ['Online Examination System', 'Conduct online tests with automatic result generation', 'Available', null],
+    ['Student Result Management System', 'Store marks and publish student results online', 'Available', null]
+  ];
+  const data = { users: [], topics: [], requests: [], nextId: { user: 5, topic: 9, request: 1 }, session: null };
+  for (const u of users) {
+    data.users.push({ id: u[0], name: u[1], username: u[2], email: u[3], roll_no: u[4], department: u[5], password: await hash(u[6]), role: u[7], created_at: stamp(48) });
+  }
+  topics.forEach((t, i) => {
+    const at = stamp(topics.length - i);
+    data.topics.push({ id: i + 1, title: t[0], description: t[1], department: 'Computer Science', status: t[2], assigned_to: t[3], created_at: at, updated_at: at });
+  });
+  return data;
+}
+
+/* ---------- Helpers ---------- */
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const now = () => new Date().toISOString();
+const niceDate = iso => iso ? new Date(iso).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+const shortDate = iso => new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+const clean = s => String(s ?? '').replace(/\s+/g, ' ').trim();
+const user = () => db.users.find(u => u.id === db.session) || null;
+const userById = id => db.users.find(u => u.id === id) || null;
+const studentTopic = id => db.topics.find(t => t.assigned_to === id) || null;
+const badge = s => `<span class="badge b-${esc(s.toLowerCase())}">${esc(s)}</span>`;
+const typeBadge = t => t === 'new' ? '<span class="badge b-new">New Topic</span>' : '<span class="badge b-existing">Existing</span>';
+const byTitle = (a, b) => a.title.localeCompare(b.title);
+
+/* ---------- Topic matching (same algorithm as the PHP version) ---------- */
+function normalize(t) { return String(t).toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+function coreWords(t) {
+  const out = new Set();
+  for (let w of normalize(t).split(' ')) {
+    if (!w || STOPWORDS.has(w)) continue;
+    if (w.length > 3 && w.endsWith('s') && !w.endsWith('ss')) w = w.slice(0, -1);
+    out.add(w);
+  }
+  return [...out];
+}
+function wordsMatch(a, b) {
+  if (a === b) return true;
+  const [s, l] = a.length < b.length ? [a, b] : [b, a];
+  return s.length >= 4 && l.startsWith(s);
+}
+function similarity(a, b) {
+  const wa = coreWords(a), wb = coreWords(b);
+  if (!wa.length || !wb.length) return 0;
+  let common = 0;
+  for (const x of wa) if (wb.some(y => wordsMatch(x, y))) common++;
+  const all = wa.length + wb.length - common;
+  return all > 0 ? Math.min(1, common / all) : 0;
+}
+function validateTitle(t) {
+  if (!t) return 'Please enter a project topic.';
+  if (t.length < 5) return 'Project topic is too short (minimum 5 characters).';
+  if (t.length > 150) return 'Project topic is too long (maximum 150 characters).';
+  if (!/^[A-Za-z0-9 .,&()\/'+:-]+$/.test(t)) return "Project topic may contain only letters, numbers, spaces and . , & ( ) / ' + : -";
+  if (!/[A-Za-z]{2,}/.test(t)) return 'Project topic must contain meaningful words.';
+  if (!coreWords(t).length) return 'Topic is too generic. Add what the system is about, e.g. "PG Finder Website".';
+  return null;
+}
+function validateDescription(t, required = true) {
+  if (required && !t) return 'Please enter a short description of the project.';
+  if (t && t.length < 10) return 'Description is too short (minimum 10 characters).';
+  if (t.length > 1000) return 'Description is too long (maximum 1000 characters).';
+  return null;
+}
+function checkTopic(title, ignoreTopicId = 0, ignoreRequestId = 0) {
+  title = clean(title);
+  const err = validateTitle(title);
+  if (err) return { state: 'invalid', message: err, topic: null, matches: [] };
+  let exact = null; const matches = [];
+  for (const t of db.topics) {
+    if (t.id === ignoreTopicId) continue;
+    const score = similarity(title, t.title);
+    if (score >= 1 || normalize(title) === normalize(t.title)) exact = t;
+    else if (score >= 0.5) matches.push({ ...t, score });
+  }
+  matches.sort((a, b) => b.score - a.score);
+  if (exact) {
+    return exact.status === 'Selected'
+      ? { state: 'taken', topic: exact, matches, message: 'This topic is already selected by another student and is not available.' }
+      : { state: 'exists', topic: exact, matches, message: 'This topic already exists in the list and is available. You can request it.' };
+  }
+  if (db.requests.some(r => r.status === 'Pending' && r.type === 'new' && r.id !== ignoreRequestId && similarity(title, r.title) >= 1)) {
+    return { state: 'pending', topic: null, matches, message: 'Another student has already requested this topic and it is waiting for approval.' };
+  }
+  if (matches.length) return { state: 'similar', topic: null, matches, message: 'No exact match, but similar topics exist. You can still submit it; the admin will review it.' };
+  return { state: 'available', topic: null, matches: [], message: `No existing project topic matches "${title}". You can submit this topic for approval.` };
+}
+function stats() {
+  return {
+    total: db.topics.length,
+    available: db.topics.filter(t => t.status === 'Available').length,
+    selected: db.topics.filter(t => t.status === 'Selected').length,
+    pending: db.requests.filter(r => r.status === 'Pending').length,
+    students: db.users.filter(u => u.role === 'student').length
+  };
+}
+
+/* ---------- UI state ---------- */
+const ui = { view: 'login', flashes: [], errors: {}, values: {}, query: '', reqFilter: 'Pending', editId: 0, menuOpen: false };
+function flash(type, message) { ui.flashes.push({ type, message }); }
+function go(view, extra = {}) { Object.assign(ui, { view, errors: {}, values: {}, editId: 0, menuOpen: false }, extra); render(); window.scrollTo(0, 0); }
+function fail(errors, values) { ui.errors = errors; ui.values = values; render(); }
+function val(name, fallback = '') { return ui.values[name] !== undefined ? ui.values[name] : fallback; }
+function ferr(name) { return ui.errors[name] ? `<div class="field-error">${esc(ui.errors[name])}</div>` : ''; }
+function inv(name) { return ui.errors[name] ? ' is-invalid' : ''; }
+function deptOptions(selected) { return DEPARTMENTS.map(d => `<option${d === selected ? ' selected' : ''}>${esc(d)}</option>`).join(''); }
+
+function confirmBox(message, onYes, yesLabel = 'Yes, continue', danger = true) {
+  const m = document.getElementById('modal');
+  m.innerHTML = `<div class="modal-back"><div class="modal" role="dialog" aria-modal="true"><p>${esc(message)}</p>
+    <div class="row"><button class="btn btn-light" id="mNo" type="button">Cancel</button><button class="btn ${danger ? 'btn-red' : ''}" id="mYes" type="button">${esc(yesLabel)}</button></div></div></div>`;
+  m.hidden = false;
+  const close = () => { m.hidden = true; m.innerHTML = ''; };
+  document.getElementById('mNo').onclick = close;
+  document.getElementById('mYes').onclick = () => { close(); onYes(); };
+  document.getElementById('mYes').focus();
+}
+
+/* ---------- Layout ---------- */
+function render() {
+  const app = document.getElementById('app');
+  const u = user();
+  if (!u) { app.innerHTML = ui.view === 'register' ? viewRegister() : viewLogin(); takeFlashes(); return; }
+  const menu = u.role === 'admin'
+    ? [['a-dash', 'Dashboard'], ['a-topics', 'Manage Topics'], ['a-requests', 'Topic Requests'], ['a-students', 'Students'], ['a-reports', 'Reports']]
+    : [['s-dash', 'Dashboard'], ['s-checker', 'Topic Checker'], ['s-topics', 'Project Topics'], ['s-requests', 'Topic Requests']];
+  if (!menu.some(m => m[0] === ui.view)) ui.view = menu[0][0];
+  const views = { 's-dash': viewStudentDash, 's-checker': viewChecker, 's-topics': viewStudentTopics, 's-requests': viewStudentRequests,
+    'a-dash': viewAdminDash, 'a-topics': viewAdminTopics, 'a-requests': viewAdminRequests, 'a-students': viewStudents, 'a-reports': viewReports };
+  app.innerHTML = `
+  <header class="topbar">
+    <button class="menu-toggle" type="button" aria-label="Toggle menu" data-act="menu">☰</button>
+    <button class="brand" type="button" data-go="${menu[0][0]}"><span class="brand-logo">P</span><span><span class="brand-title">${APP_NAME}</span><span class="brand-sub">${TAGLINE}</span></span></button>
+    <div class="user-box"><div class="user-info"><strong>${esc(u.name)}</strong><small>${u.role === 'admin' ? 'Admin' : 'Student'}</small></div>
+      <button class="btn btn-logout" type="button" data-act="logout">Logout</button></div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar${ui.menuOpen ? ' open' : ''}">
+      <div class="menu-label">Main Menu</div>
+      <nav>${menu.map(([v, label]) => `<button type="button" class="nav-link${v === ui.view ? ' active' : ''}" data-go="${v}"><span class="nav-dot"></span>${label}</button>`).join('')}</nav>
+      <div class="side-foot">Demo version: data is saved in this browser.<br><button type="button" data-act="reset">Reset demo data</button></div>
+    </aside>
+    <main class="content">
+      <div id="flashes"></div>
+      ${views[ui.view](u)}
+      <p class="hint" style="text-align:center;margin-top:30px">© ${new Date().getFullYear()} ${TAGLINE} System</p>
+    </main>
+  </div>`;
+  takeFlashes();
+}
+function takeFlashes() {
+  const box = document.getElementById('flashes');
+  if (!box) return;
+  box.innerHTML = ui.flashes.map(f => `<div class="alert alert-${f.type}">${esc(f.message)}</div>`).join('');
+  ui.flashes = [];
+}
+function statCard(icon, cls, num, label) {
+  return `<div class="stat"><div class="stat-icon ${cls}">${ICONS[icon]}</div><div class="stat-num">${num}</div><div class="stat-label">${label}</div></div>`;
+}
+function searchBox(table, placeholder, withStatus = true) {
+  return `<div class="toolbar"><div class="search-wrap">${ICONS.search}<input class="input" id="f-${table}" placeholder="${placeholder}" data-filter="${table}" aria-label="Search"></div>
+    ${withStatus ? `<select class="input" id="s-${table}" data-status-filter="${table}" aria-label="Filter by status"><option value="">All Status</option><option>Available</option><option>Selected</option></select>` : ''}</div>`;
+}
+
+/* ---------- Auth views ---------- */
+function authBrand() { return `<div class="auth-brand"><span class="brand-logo">P</span><span><span class="brand-title">${APP_NAME}</span><span class="brand-sub">${TAGLINE}</span></span></div>`; }
+function viewLogin() {
+  return `<div class="auth-page"><div class="card auth-card">${authBrand()}
+    <h2>Login</h2><p class="sub">Students and admin (teacher) login with username and password.</p>
+    <div id="flashes"></div>
+    ${ui.errors.login ? `<div class="alert alert-error">${esc(ui.errors.login)}</div>` : ''}
+    <form data-form="login" novalidate>
+      <div class="field"><label for="l-user">Username</label><input class="input${inv('username')}" id="l-user" name="username" value="${esc(val('username'))}" autocomplete="username">${ferr('username')}</div>
+      <div class="field"><label for="l-pass">Password</label><div class="pw-wrap"><input class="input${inv('password')}" type="password" id="l-pass" name="password" autocomplete="current-password"><button type="button" class="pw-toggle" data-act="pw">Show</button></div>${ferr('password')}</div>
+      <button class="btn btn-block" type="submit">Login</button>
+    </form>
+    <div class="auth-foot">New student? <button class="link-btn" type="button" data-go="register">Create an account</button></div>
+    <div class="demo-box"><b>Demo accounts</b> (tap to fill)
+      <div class="row"><span>Admin: <code>admin</code> / <code>admin123</code></span><button class="btn btn-sm btn-light" type="button" data-fill="admin">Use</button></div>
+      <div class="row"><span>Student: <code>student</code> / <code>student123</code></span><button class="btn btn-sm btn-light" type="button" data-fill="student">Use</button></div>
+      <div class="row" style="margin-top:4px"><span>Data is saved in this browser.</span><button class="link-btn" type="button" data-act="reset" style="font-size:13px">Reset demo data</button></div>
+    </div>
+  </div></div>`;
+}
+function viewRegister() {
+  return `<div class="auth-page"><div class="card auth-card wide">${authBrand()}
+    <h2>Student Registration</h2><p class="sub">Create your account to check and request project topics.</p>
+    ${Object.keys(ui.errors).length ? '<div class="alert alert-error">Please correct the highlighted fields.</div>' : ''}
+    <form data-form="register" novalidate><div class="grid-2">
+      <div class="field"><label for="r-name">Full Name</label><input class="input${inv('name')}" id="r-name" name="name" value="${esc(val('name'))}">${ferr('name')}</div>
+      <div class="field"><label for="r-roll">Roll Number</label><input class="input${inv('roll_no')}" id="r-roll" name="roll_no" value="${esc(val('roll_no'))}">${ferr('roll_no')}</div>
+      <div class="field"><label for="r-user">Username</label><input class="input${inv('username')}" id="r-user" name="username" value="${esc(val('username'))}">${ferr('username')}</div>
+      <div class="field"><label for="r-email">Email</label><input class="input${inv('email')}" type="email" id="r-email" name="email" value="${esc(val('email'))}">${ferr('email')}</div>
+      <div class="field"><label for="r-dept">Department</label><select class="input${inv('department')}" id="r-dept" name="department"><option value="">-- Select --</option>${deptOptions(val('department'))}</select>${ferr('department')}</div>
+      <div></div>
+      <div class="field"><label for="r-pass">Password</label><div class="pw-wrap"><input class="input${inv('password')}" type="password" id="r-pass" name="password" autocomplete="new-password"><button type="button" class="pw-toggle" data-act="pw">Show</button></div>${ferr('password')}<div class="hint">At least 6 characters with a letter and a number.</div></div>
+      <div class="field"><label for="r-conf">Confirm Password</label><input class="input${inv('confirm')}" type="password" id="r-conf" name="confirm" autocomplete="new-password">${ferr('confirm')}</div>
+    </div><button class="btn btn-block" type="submit">Register</button></form>
+    <div class="auth-foot">Already registered? <button class="link-btn" type="button" data-go="login">Login</button></div>
+  </div></div>`;
+}
+
+/* ---------- Student views ---------- */
+function viewStudentDash(u) {
+  const s = stats();
+  const mine = db.requests.filter(r => r.student_id === u.id && r.status === 'Pending').length;
+  const my = studentTopic(u.id);
+  const recent = [...db.topics].sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id).slice(0, 5);
+  return `<div class="page-head"><h1>Dashboard</h1><p>Welcome to the Online Project Topic Availability Checker and Management System.</p></div>
+  <div class="stats">${statCard('book', 'i-blue', s.total, 'Total Project Topics')}${statCard('check', 'i-green', s.available, 'Available Topics')}${statCard('lock', 'i-red', s.selected, 'Selected Topics')}${statCard('clock', 'i-amber', mine, 'My Pending Requests')}</div>
+  ${my ? `<div class="alert alert-success">Your project topic is approved: <b>${esc(my.title)}</b> (${esc(my.department)})</div>` : ''}
+  <div class="card"><div class="card-head"><h2>Quick Topic Availability Check</h2><button class="btn" type="button" data-go="s-checker">Open Checker</button></div>
+    <p class="muted" style="margin:0">Students can search for a project topic and instantly verify whether the topic is available before submitting it.</p></div>
+  <div class="card"><h2>Recently Added Topics</h2><div class="table-wrap"><table><thead><tr><th>Project Topic</th><th>Department</th><th>Status</th></tr></thead><tbody>
+    ${recent.map(t => `<tr><td class="t-title">${esc(t.title)}</td><td>${esc(t.department)}</td><td>${badge(t.status)}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">No topics added yet.</td></tr>'}
+  </tbody></table></div></div>`;
+}
+
+const RESULT_TITLES = { available: '✓ Topic Appears to be Available', similar: '⚠ Similar Topics Found', exists: 'ℹ Topic Already in the List', taken: '✗ Topic Not Available', pending: '✗ Topic Already Requested', invalid: '✗ Please Check Your Input' };
+
+function viewChecker(u) {
+  const my = studentTopic(u.id);
+  const requested = db.requests.filter(r => r.student_id === u.id && r.status === 'Pending' && r.topic_id).map(r => r.topic_id);
+  let resultHtml = '';
+  if (ui.query !== '') {
+    const q = ui.query;
+    const r = q ? checkTopic(q) : { state: 'invalid', message: 'Please enter a project topic to check.', topic: null, matches: [] };
+    if (r.state === 'taken' && r.topic.assigned_to === u.id) r.message = 'This topic is already approved for you.';
+    let action = '';
+    if (my && ['available', 'similar', 'exists'].includes(r.state)) {
+      action = `<p style="margin-top:10px"><i>You already have an approved topic (${esc(my.title)}), so you cannot request another one.</i></p>`;
+    } else if (r.state === 'exists') {
+      action = requested.includes(r.topic.id) ? '<p style="margin-top:12px"><span class="badge b-pending">You have already requested this topic</span></p>'
+        : `<p style="margin-top:14px"><button class="btn btn-green" type="button" data-request="${r.topic.id}">Request This Topic</button></p>`;
+    } else if (r.state === 'available' || r.state === 'similar') {
+      action = `<form data-form="propose" novalidate><input type="hidden" name="title" value="${esc(q)}">
+        <div class="grid-2"><div class="field"><label for="c-dept">Department</label><select class="input" id="c-dept" name="department">${deptOptions(val('department', u.department))}</select></div>
+        <div class="field"><label for="c-topic">Topic</label><input class="input" id="c-topic" value="${esc(q)}" disabled></div></div>
+        <div class="field"><label for="c-desc">Short Description</label><textarea class="input${inv('description')}" id="c-desc" name="description" placeholder="What will this project do? (10-1000 characters)">${esc(val('description'))}</textarea>${ferr('description')}</div>
+        <button class="btn btn-green" type="submit">Submit Topic for Approval</button></form>`;
+    }
+    resultHtml = `<div class="result result-${r.state}"><h3>${RESULT_TITLES[r.state]}</h3><p>${esc(r.message)}</p>
+      ${r.topic ? `<p>Existing topic: <b>${esc(r.topic.title)}</b> — ${esc(r.topic.department)} — ${badge(r.topic.status)}</p>` : ''}
+      ${r.matches.length ? `<p style="margin-top:10px"><b>Similar existing topics:</b></p><ul>${r.matches.slice(0, 5).map(m => `<li>${esc(m.title)} — ${badge(m.status)} <span class="muted">(${Math.round(m.score * 100)}% match)</span></li>`).join('')}</ul>` : ''}
+      ${action}</div>`;
+  }
+  const topics = [...db.topics].sort(byTitle);
+  return `<div class="page-head"><h1>Project Topic Availability Checker</h1><p>Search and check whether a project topic is available.</p></div>
+  <div class="card narrow"><h2>Check Project Topic Availability</h2><p class="sub">Enter your proposed project topic below.</p>
+    <form data-form="check" class="form-row" novalidate><div class="grow"><input class="input" id="c-q" name="q" value="${esc(ui.query)}" placeholder="Example: Online Library Management System" maxlength="150" aria-label="Project topic"></div>
+    <button class="btn" type="submit">Check Availability</button></form></div>
+  ${resultHtml}
+  <div class="card"><h2 style="margin-bottom:14px">Search Existing Topics</h2>${searchBox('topicTable', 'Search project topic...')}
+  <div class="table-wrap"><table id="topicTable"><thead><tr><th>Project Topic</th><th>Department</th><th>Status</th><th>Action</th></tr></thead><tbody>
+    ${topics.map(t => `<tr data-row data-status="${t.status}"><td><div class="t-title">${esc(t.title)}</div><div class="t-desc">${esc(t.description)}</div></td><td>${esc(t.department)}</td><td>${badge(t.status)}</td>
+      <td>${t.status !== 'Available' ? '<span class="muted">-</span>' : requested.includes(t.id) ? '<span class="badge b-pending">Requested</span>' : my ? '<span class="muted">-</span>' : `<button class="btn btn-sm" type="button" data-request="${t.id}">Request</button>`}</td></tr>`).join('')}
+    <tr data-empty-filter hidden><td colspan="4" class="empty">No topics match your search.</td></tr>
+  </tbody></table></div></div>`;
+}
+
+function viewStudentTopics() {
+  const topics = [...db.topics].sort((a, b) => a.department.localeCompare(b.department) || byTitle(a, b));
+  return `<div class="page-head"><h1>Project Topics</h1><p>All project topics maintained by the department, with their current availability.</p></div>
+  <div class="card">${searchBox('allTopics', 'Search by title, description or department...')}
+  <div class="table-wrap"><table id="allTopics"><thead><tr><th>#</th><th>Project Topic</th><th>Department</th><th>Added On</th><th>Status</th></tr></thead><tbody>
+    ${topics.map((t, i) => `<tr data-row data-status="${t.status}"><td class="muted">${i + 1}</td><td><div class="t-title">${esc(t.title)}</div><div class="t-desc">${esc(t.description)}</div></td><td>${esc(t.department)}</td><td class="muted">${shortDate(t.created_at)}</td><td>${badge(t.status)}</td></tr>`).join('')}
+    <tr data-empty-filter hidden><td colspan="5" class="empty">No topics match your search.</td></tr>
+  </tbody></table></div><p class="hint">To request a topic, use the <button class="link-btn" type="button" data-go="s-checker">Topic Checker</button>.</p></div>`;
+}
+
+function viewStudentRequests(u) {
+  const reqs = db.requests.filter(r => r.student_id === u.id).sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id);
+  const my = studentTopic(u.id);
+  return `<div class="page-head"><h1>Topic Requests</h1><p>Track the status of topics you requested or proposed.</p></div>
+  ${my ? `<div class="alert alert-success">Approved topic: <b>${esc(my.title)}</b></div>` : ''}
+  <div class="card"><h2>My Requests</h2><div class="table-wrap"><table><thead><tr><th>Project Topic</th><th>Type</th><th>Requested On</th><th>Status</th><th>Admin Remark</th><th>Action</th></tr></thead><tbody>
+    ${reqs.map(r => `<tr><td><div class="t-title">${esc(r.title)}</div><div class="t-desc">${esc(r.department)}</div></td><td>${typeBadge(r.type)}</td><td class="muted">${niceDate(r.created_at)}</td><td>${badge(r.status)}</td><td class="muted">${esc(r.remark || '-')}</td>
+      <td>${r.status === 'Pending' ? `<button class="btn btn-sm btn-light" type="button" data-cancel="${r.id}">Cancel</button>` : '<span class="muted">-</span>'}</td></tr>`).join('')
+      || '<tr><td colspan="6" class="empty">You have not requested any topic yet. Use the <button class="link-btn" type="button" data-go="s-checker">Topic Checker</button> to find one.</td></tr>'}
+  </tbody></table></div></div>
+  ${my ? '' : `<div class="card"><h2>Propose a New Topic</h2><p class="sub">The topic is checked for duplicates automatically before it is submitted.</p>
+    <form data-form="propose" novalidate><div class="grid-2">
+      <div class="field"><label for="p-title">Project Topic</label><input class="input${inv('title')}" id="p-title" name="title" maxlength="150" placeholder="e.g. PG Finder Website" value="${esc(val('title'))}">${ferr('title')}</div>
+      <div class="field"><label for="p-dept">Department</label><select class="input" id="p-dept" name="department">${deptOptions(val('department', u.department))}</select></div></div>
+      <div class="field"><label for="p-desc">Short Description</label><textarea class="input${inv('description')}" id="p-desc" name="description" placeholder="What will this project do?">${esc(val('description'))}</textarea>${ferr('description')}</div>
+      <button class="btn" type="submit">Submit for Approval</button></form></div>`}`;
+}
+
+/* ---------- Admin views ---------- */
+function viewAdminDash() {
+  const s = stats();
+  const pending = db.requests.filter(r => r.status === 'Pending').sort((a, b) => a.created_at.localeCompare(b.created_at)).slice(0, 5);
+  const recent = [...db.topics].sort((a, b) => b.updated_at.localeCompare(a.updated_at) || b.id - a.id).slice(0, 5);
+  return `<div class="page-head"><h1>Admin Dashboard</h1><p>Manage project topics, approve student requests and generate reports.</p></div>
+  <div class="stats">${statCard('book', 'i-blue', s.total, 'Total Project Topics')}${statCard('check', 'i-green', s.available, 'Available Topics')}${statCard('lock', 'i-red', s.selected, 'Selected Topics')}${statCard('clock', 'i-amber', s.pending, 'Pending Requests')}${statCard('users', 'i-violet', s.students, 'Registered Students')}</div>
+  <div class="card"><div class="card-head"><h2>Pending Requests</h2><button class="btn btn-sm" type="button" data-go="a-requests">View All Requests</button></div>
+  <div class="table-wrap"><table><thead><tr><th>Student</th><th>Project Topic</th><th>Type</th><th>Requested On</th></tr></thead><tbody>
+    ${pending.map(r => { const st = userById(r.student_id) || {}; return `<tr><td><div class="t-title">${esc(st.name)}</div><div class="t-desc">${esc(st.roll_no)}</div></td><td>${esc(r.title)}</td><td>${typeBadge(r.type)}</td><td class="muted">${niceDate(r.created_at)}</td></tr>`; }).join('') || '<tr><td colspan="4" class="empty">No pending requests.</td></tr>'}
+  </tbody></table></div></div>
+  <div class="card"><div class="card-head"><h2>Recently Updated Topics</h2><button class="btn btn-sm" type="button" data-go="a-topics">Manage Topics</button></div>
+  <div class="table-wrap"><table><thead><tr><th>Project Topic</th><th>Department</th><th>Status</th><th>Assigned To</th></tr></thead><tbody>
+    ${recent.map(t => `<tr><td class="t-title">${esc(t.title)}</td><td>${esc(t.department)}</td><td>${badge(t.status)}</td><td>${esc(userById(t.assigned_to)?.name || '-')}</td></tr>`).join('')}
+  </tbody></table></div></div>`;
+}
+
+function viewAdminTopics() {
+  const editing = ui.editId ? db.topics.find(t => t.id === ui.editId) : null;
+  const f = { title: val('title', editing?.title || ''), description: val('description', editing?.description || ''), department: val('department', editing?.department || DEPARTMENTS[0]),
+    status: val('status', editing?.status || 'Available'), assigned_to: String(val('assigned_to', editing?.assigned_to ?? '')) };
+  const students = db.users.filter(u => u.role === 'student').sort((a, b) => a.name.localeCompare(b.name));
+  const topics = [...db.topics].sort(byTitle);
+  return `<div class="page-head"><h1>Manage Project Topics</h1><p>Add, edit, delete, assign or release project topics.</p></div>
+  <div class="card" id="topic-form"><h2>${editing ? 'Edit Topic' : 'Add New Topic'}</h2><p class="sub">Duplicate titles are blocked automatically.</p>
+  <form data-form="topic" novalidate><div class="grid-2">
+    <div class="field"><label for="t-title">Project Topic</label><input class="input${inv('title')}" id="t-title" name="title" maxlength="150" value="${esc(f.title)}">${ferr('title')}</div>
+    <div class="field"><label for="t-dept">Department</label><select class="input" id="t-dept" name="department">${deptOptions(f.department)}</select></div>
+    <div class="field"><label for="t-status">Status</label><select class="input" id="t-status" name="status" data-act-change="status"><option${f.status === 'Available' ? ' selected' : ''}>Available</option><option${f.status === 'Selected' ? ' selected' : ''}>Selected</option></select></div>
+    <div class="field" id="assignField" style="visibility:${f.status === 'Selected' ? 'visible' : 'hidden'}"><label for="t-assign">Assigned To (when Selected)</label><select class="input${inv('assigned_to')}" id="t-assign" name="assigned_to"><option value="">-- Select student --</option>
+      ${students.map(s => `<option value="${s.id}"${String(s.id) === f.assigned_to ? ' selected' : ''}>${esc(s.name)} (${esc(s.roll_no)})</option>`).join('')}</select>${ferr('assigned_to')}</div>
+  </div>
+  <div class="field"><label for="t-desc">Description</label><textarea class="input${inv('description')}" id="t-desc" name="description">${esc(f.description)}</textarea>${ferr('description')}</div>
+  <div class="action-cell"><button class="btn" type="submit">${editing ? 'Update Topic' : 'Add Topic'}</button>${editing ? '<button class="btn btn-light" type="button" data-go="a-topics">Cancel</button>' : ''}</div></form></div>
+  <div class="card"><h2 style="margin-bottom:14px">All Topics (${topics.length})</h2>${searchBox('adminTopics', 'Search topics...')}
+  <div class="table-wrap"><table id="adminTopics"><thead><tr><th>Project Topic</th><th>Department</th><th>Status</th><th>Assigned To</th><th>Action</th></tr></thead><tbody>
+    ${topics.map(t => { const st = userById(t.assigned_to); return `<tr data-row data-status="${t.status}"><td><div class="t-title">${esc(t.title)}</div><div class="t-desc">${esc(t.description)}</div></td><td>${esc(t.department)}</td><td>${badge(t.status)}</td>
+      <td>${st ? `${esc(st.name)}<div class="t-desc">${esc(st.roll_no)}</div>` : '<span class="muted">-</span>'}</td>
+      <td><div class="action-cell"><button class="btn btn-sm btn-light" type="button" data-edit="${t.id}">Edit</button>${t.status === 'Selected' ? `<button class="btn btn-sm btn-green" type="button" data-release="${t.id}">Release</button>` : ''}<button class="btn btn-sm btn-red" type="button" data-delete="${t.id}">Delete</button></div></td></tr>`; }).join('')}
+    <tr data-empty-filter hidden><td colspan="5" class="empty">No topics match your search.</td></tr>
+  </tbody></table></div></div>`;
+}
+
+function viewAdminRequests() {
+  const f = ui.reqFilter;
+  const list = db.requests.filter(r => f === 'All' || r.status === f).sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id);
+  return `<div class="page-head"><h1>Topic Requests</h1><p>Approve or reject topics requested by students. Duplicate checks run again on approval.</p></div>
+  <div class="card"><div class="toolbar">${['Pending', 'Approved', 'Rejected', 'All'].map(s => `<button type="button" class="btn btn-sm ${f === s ? '' : 'btn-light'}" data-rfilter="${s}">${s}</button>`).join('')}</div>
+  <div class="table-wrap"><table><thead><tr><th>Student</th><th>Project Topic</th><th>Type</th><th>Requested On</th><th>Status</th><th>Action / Remark</th></tr></thead><tbody>
+    ${list.map(r => {
+      const st = userById(r.student_id) || {};
+      const dupe = r.status === 'Pending' && r.type === 'new' ? checkTopic(r.title, 0, r.id) : null;
+      return `<tr><td><div class="t-title">${esc(st.name)}</div><div class="t-desc">${esc(st.roll_no)}</div></td>
+        <td><div class="t-title">${esc(r.title)}</div><div class="t-desc">${esc(r.department)}${r.description ? ' — ' + esc(r.description) : ''}</div>
+        ${dupe && dupe.matches.length ? `<div class="t-desc" style="color:var(--amber)">⚠ Similar to: ${esc(dupe.matches.slice(0, 3).map(m => m.title).join(', '))}</div>` : ''}</td>
+        <td>${typeBadge(r.type)}</td><td class="muted">${niceDate(r.created_at)}</td><td>${badge(r.status)}</td>
+        <td>${r.status === 'Pending' ? `<div class="action-cell"><input class="input remark" id="remark-${r.id}" maxlength="255" placeholder="Remark (required to reject)" aria-label="Remark"><button class="btn btn-sm btn-green" type="button" data-approve="${r.id}">Approve</button><button class="btn btn-sm btn-red" type="button" data-reject="${r.id}">Reject</button></div>` : `<span class="muted">${esc(r.remark || '-')}</span>`}</td></tr>`;
+    }).join('') || `<tr><td colspan="6" class="empty">No ${f === 'All' ? '' : f.toLowerCase()} requests.</td></tr>`}
+  </tbody></table></div></div>`;
+}
+
+function viewStudents() {
+  const students = db.users.filter(u => u.role === 'student').sort((a, b) => a.name.localeCompare(b.name));
+  return `<div class="page-head"><h1>Registered Students</h1><p>All student accounts and their allocated project topics.</p></div>
+  <div class="card">${searchBox('studentTable', 'Search students...', false)}
+  <div class="table-wrap"><table id="studentTable"><thead><tr><th>Name</th><th>Roll No</th><th>Username / Email</th><th>Department</th><th>Allocated Topic</th><th>Requests</th><th>Action</th></tr></thead><tbody>
+    ${students.map(s => { const t = studentTopic(s.id); return `<tr data-row><td class="t-title">${esc(s.name)}</td><td>${esc(s.roll_no)}</td><td>${esc(s.username)}<div class="t-desc">${esc(s.email)}</div></td><td>${esc(s.department)}</td>
+      <td>${t ? esc(t.title) : '<span class="muted">Not allocated</span>'}</td><td>${db.requests.filter(r => r.student_id === s.id).length}</td>
+      <td><button class="btn btn-sm btn-red" type="button" data-delstudent="${s.id}">Delete</button></td></tr>`; }).join('') || '<tr><td colspan="7" class="empty">No students registered yet.</td></tr>'}
+    <tr data-empty-filter hidden><td colspan="7" class="empty">No students match your search.</td></tr>
+  </tbody></table></div></div>`;
+}
+
+function viewReports() {
+  const s = stats();
+  const selected = db.topics.filter(t => t.status === 'Selected').sort((a, b) => a.department.localeCompare(b.department) || byTitle(a, b));
+  const available = db.topics.filter(t => t.status === 'Available').sort((a, b) => a.department.localeCompare(b.department) || byTitle(a, b));
+  const depts = {};
+  db.topics.forEach(t => { depts[t.department] = depts[t.department] || { total: 0, selected: 0 }; depts[t.department].total++; if (t.status === 'Selected') depts[t.department].selected++; });
+  const cnt = st => db.requests.filter(r => r.status === st).length;
+  const pct = s.total ? Math.round(s.selected / s.total * 100) : 0;
+  return `<div class="page-head"><h1>Reports</h1><p>Summary of selected and available project topics. Generated on ${niceDate(now())}.</p></div>
+  <div class="toolbar"><button class="btn btn-light" type="button" data-copycsv="selected">Copy selected topics (CSV)</button><button class="btn btn-light" type="button" data-copycsv="available">Copy available topics (CSV)</button></div>
+  <div class="report-grid">
+    <div class="card"><h2>Topic Summary</h2><div class="kv"><span>Total topics</span><b>${s.total}</b></div><div class="kv"><span>Available</span><b>${s.available}</b></div><div class="kv"><span>Selected</span><b>${s.selected}</b></div>
+      <div class="bar"><span style="width:${pct}%"></span></div><p class="hint">${pct}% of topics are selected</p></div>
+    <div class="card"><h2>Requests Summary</h2><div class="kv"><span>Pending</span><b>${cnt('Pending')}</b></div><div class="kv"><span>Approved</span><b>${cnt('Approved')}</b></div><div class="kv"><span>Rejected</span><b>${cnt('Rejected')}</b></div></div>
+    <div class="card"><h2>Department-wise</h2>${Object.keys(depts).sort().map(d => `<p style="margin:8px 0 2px">${esc(d)}: <b>${depts[d].selected}</b> / ${depts[d].total} selected</p><div class="bar"><span style="width:${Math.round(depts[d].selected / depts[d].total * 100)}%"></span></div>`).join('') || '<p class="muted">No topics yet.</p>'}</div>
+  </div>
+  <div class="card"><h2>Selected Topics (${selected.length})</h2><div class="table-wrap"><table><thead><tr><th>#</th><th>Project Topic</th><th>Department</th><th>Student</th><th>Roll No</th></tr></thead><tbody>
+    ${selected.map((t, i) => { const st = userById(t.assigned_to) || {}; return `<tr><td>${i + 1}</td><td class="t-title">${esc(t.title)}</td><td>${esc(t.department)}</td><td>${esc(st.name || '-')}</td><td>${esc(st.roll_no || '-')}</td></tr>`; }).join('') || '<tr><td colspan="5" class="empty">No selected topics.</td></tr>'}
+  </tbody></table></div></div>
+  <div class="card"><h2>Available Topics (${available.length})</h2><div class="table-wrap"><table><thead><tr><th>#</th><th>Project Topic</th><th>Department</th><th>Description</th></tr></thead><tbody>
+    ${available.map((t, i) => `<tr><td>${i + 1}</td><td class="t-title">${esc(t.title)}</td><td>${esc(t.department)}</td><td class="muted">${esc(t.description)}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">No available topics.</td></tr>'}
+  </tbody></table></div></div>`;
+}
+
+/* ---------- Actions ---------- */
+function formData(form) { const o = {}; new FormData(form).forEach((v, k) => { o[k] = typeof v === 'string' ? v.trim() : v; }); return o; }
+
+async function doLogin(d) {
+  const errors = {};
+  if (!d.username) errors.username = 'This field is required.';
+  if (!d.password) errors.password = 'This field is required.';
+  if (Object.keys(errors).length) return fail(errors, { username: d.username });
+  const u = db.users.find(x => x.username === d.username);
+  if (!u || u.password !== await hash(d.password)) return fail({ login: 'Invalid username or password.' }, { username: d.username });
+  db.session = u.id; persist();
+  flash('success', `Welcome, ${u.name}!`);
+  go(u.role === 'admin' ? 'a-dash' : 's-dash', { query: '' });
+}
+
+async function doRegister(d) {
+  const e = {};
+  if (!/^[A-Za-z .']{3,100}$/.test(d.name)) e.name = 'Enter your full name (letters only, 3-100 characters).';
+  if (!/^[A-Za-z0-9\/-]{2,30}$/.test(d.roll_no)) e.roll_no = 'Enter a valid roll number.';
+  if (!/^[a-zA-Z0-9_]{3,30}$/.test(d.username)) e.username = 'Username must be 3-30 letters, numbers or underscore.';
+  else if (db.users.some(u => u.username.toLowerCase() === d.username.toLowerCase())) e.username = 'This username is already taken.';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) e.email = 'Enter a valid email address.';
+  else if (db.users.some(u => u.email.toLowerCase() === d.email.toLowerCase())) e.email = 'An account with this email already exists.';
+  if (!DEPARTMENTS.includes(d.department)) e.department = 'Please select your department.';
+  if (d.password.length < 6) e.password = 'Password must be at least 6 characters.';
+  else if (!/[A-Za-z]/.test(d.password) || !/\d/.test(d.password)) e.password = 'Password must contain at least one letter and one number.';
+  if (d.password !== d.confirm) e.confirm = 'Passwords do not match.';
+  if (Object.keys(e).length) return fail(e, { name: d.name, roll_no: d.roll_no, username: d.username, email: d.email, department: d.department });
+  db.users.push({ id: db.nextId.user++, name: d.name, username: d.username, email: d.email, roll_no: d.roll_no.toUpperCase(), department: d.department, password: await hash(d.password), role: 'student', created_at: now() });
+  persist();
+  flash('success', 'Registration successful. Please login.');
+  go('login');
+}
+
+function canRequest(u) {
+  if (studentTopic(u.id)) { flash('error', 'You already have an approved project topic. You cannot request another one.'); return false; }
+  if (db.requests.filter(r => r.student_id === u.id && r.status === 'Pending').length >= MAX_PENDING) {
+    flash('error', `You already have ${MAX_PENDING} pending requests. Cancel one or wait for the admin.`); return false;
+  }
+  return true;
+}
+
+function requestExisting(topicId) {
+  const u = user();
+  const t = db.topics.find(x => x.id === topicId);
+  if (!canRequest(u)) return go('s-requests');
+  if (!t || t.status !== 'Available') { flash('error', 'Sorry, this topic is no longer available.'); return go('s-checker', { query: ui.query }); }
+  if (db.requests.some(r => r.student_id === u.id && r.topic_id === t.id && r.status === 'Pending')) { flash('error', 'You have already requested this topic.'); return go('s-requests'); }
+  db.requests.push({ id: db.nextId.request++, student_id: u.id, topic_id: t.id, title: t.title, description: t.description, department: t.department, type: 'existing', status: 'Pending', remark: '', created_at: now(), updated_at: now() });
+  persist();
+  flash('success', `Request sent for "${t.title}". Wait for admin approval.`);
+  go('s-requests', { query: '' });
+}
+
+function propose(d) {
+  const u = user();
+  let title = clean(d.title);
+  if (title && title === title.toLowerCase()) title = title.replace(/\b\w/g, c => c.toUpperCase());
+  const check = checkTopic(title);
+  const e = {};
+  if (['invalid', 'taken', 'exists', 'pending'].includes(check.state)) e.title = check.message;
+  const descErr = validateDescription(d.description || '');
+  if (descErr) e.description = descErr;
+  if (!DEPARTMENTS.includes(d.department)) e.department = 'Please select a valid department.';
+  if (Object.keys(e).length) {
+    if (ui.view === 's-checker' && e.title) { flash('error', e.title); return go('s-checker', { query: ui.query }); }
+    return fail(e, d);
+  }
+  if (!canRequest(u)) return go('s-requests');
+  db.requests.push({ id: db.nextId.request++, student_id: u.id, topic_id: null, title, description: d.description, department: d.department, type: 'new', status: 'Pending', remark: '', created_at: now(), updated_at: now() });
+  persist();
+  flash('success', `Your new topic "${title}" was submitted for approval.`);
+  go('s-requests', { query: '' });
+}
+
+function saveTopic(d) {
+  const editing = ui.editId ? db.topics.find(t => t.id === ui.editId) : null;
+  const title = clean(d.title);
+  const e = {};
+  const check = checkTopic(title, editing ? editing.id : 0);
+  if (check.state === 'invalid') e.title = check.message;
+  else if (check.state === 'taken' || check.state === 'exists') e.title = `A topic with the same title already exists: "${check.topic.title}".`;
+  const de = validateDescription(d.description || '', false); if (de) e.description = de;
+  let assigned = null;
+  if (d.status === 'Selected') {
+    const st = db.users.find(u => u.id === Number(d.assigned_to) && u.role === 'student');
+    if (!st) e.assigned_to = 'Select the student this topic is assigned to.';
+    else {
+      const has = studentTopic(st.id);
+      if (has && (!editing || has.id !== editing.id)) e.assigned_to = `${st.name} already has the topic "${has.title}".`;
+      assigned = st.id;
+    }
+  }
+  if (Object.keys(e).length) return fail(e, d);
+  if (editing) {
+    Object.assign(editing, { title, description: d.description, department: d.department, status: d.status, assigned_to: assigned, updated_at: now() });
+    flash('success', 'Topic updated successfully.');
+  } else {
+    db.topics.push({ id: db.nextId.topic++, title, description: d.description, department: d.department, status: d.status, assigned_to: assigned, created_at: now(), updated_at: now() });
+    flash('success', 'Topic added successfully.');
+  }
+  if (assigned) db.requests.forEach(r => { if (r.student_id === assigned && r.status === 'Pending') Object.assign(r, { status: 'Rejected', remark: 'Topic assigned by admin', updated_at: now() }); });
+  persist();
+  go('a-topics');
+}
+
+function approve(id) {
+  const r = db.requests.find(x => x.id === id && x.status === 'Pending');
+  if (!r) { flash('error', 'Request not found or already processed.'); return render(); }
+  const remark = clean(document.getElementById('remark-' + id)?.value || '').slice(0, 255);
+  if (studentTopic(r.student_id)) { flash('error', 'This student already has an approved topic.'); return render(); }
+  let topic;
+  if (r.type === 'existing') {
+    topic = db.topics.find(t => t.id === r.topic_id && t.status === 'Available');
+    if (!topic) { flash('error', 'This topic is no longer available.'); return render(); }
+    Object.assign(topic, { status: 'Selected', assigned_to: r.student_id, updated_at: now() });
+  } else {
+    const c = checkTopic(r.title, 0, r.id);
+    if (['taken', 'exists', 'invalid'].includes(c.state)) { flash('error', 'Cannot approve: ' + c.message); return render(); }
+    topic = { id: db.nextId.topic++, title: r.title, description: r.description, department: r.department, status: 'Selected', assigned_to: r.student_id, created_at: now(), updated_at: now() };
+    db.topics.push(topic);
+  }
+  Object.assign(r, { status: 'Approved', topic_id: topic.id, remark: remark || 'Approved', updated_at: now() });
+  db.requests.forEach(o => {
+    if (o.status !== 'Pending') return;
+    if (o.topic_id === topic.id || (o.type === 'new' && similarity(o.title, r.title) >= 1)) Object.assign(o, { status: 'Rejected', remark: 'Topic assigned to another student', updated_at: now() });
+    else if (o.student_id === r.student_id) Object.assign(o, { status: 'Rejected', remark: 'Another topic was approved for you', updated_at: now() });
+  });
+  persist();
+  flash('success', `Request approved. "${r.title}" is now assigned to the student.`);
+  render();
+}
+
+function reject(id) {
+  const r = db.requests.find(x => x.id === id && x.status === 'Pending');
+  const remark = clean(document.getElementById('remark-' + id)?.value || '').slice(0, 255);
+  if (!r) { flash('error', 'Request not found or already processed.'); return render(); }
+  if (!remark) { flash('error', 'Please enter a reason when rejecting a request.'); render(); document.getElementById('remark-' + id)?.focus(); return; }
+  Object.assign(r, { status: 'Rejected', remark, updated_at: now() });
+  persist();
+  flash('success', 'Request rejected.');
+  render();
+}
+
+function csvFor(kind) {
+  const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  if (kind === 'selected') {
+    const rows = db.topics.filter(t => t.status === 'Selected').map((t, i) => { const s = userById(t.assigned_to) || {}; return [i + 1, t.title, t.department, s.name || '', s.roll_no || ''].map(q).join(','); });
+    return ['#,Project Topic,Department,Student,Roll No', ...rows].join('\n');
+  }
+  const rows = db.topics.filter(t => t.status === 'Available').map((t, i) => [i + 1, t.title, t.department, t.description].map(q).join(','));
+  return ['#,Project Topic,Department,Description', ...rows].join('\n');
+}
+
+function filterTable(id) {
+  const table = document.getElementById(id);
+  if (!table) return;
+  const q = (document.getElementById('f-' + id)?.value || '').trim().toLowerCase();
+  const st = document.getElementById('s-' + id)?.value || '';
+  let shown = 0;
+  table.querySelectorAll('tbody tr[data-row]').forEach(row => {
+    const ok = (!q || row.textContent.toLowerCase().includes(q)) && (!st || row.dataset.status === st);
+    row.hidden = !ok; if (ok) shown++;
+  });
+  const empty = table.querySelector('tr[data-empty-filter]');
+  if (empty) empty.hidden = shown > 0;
+}
+
+/* ---------- Event wiring ---------- */
+document.addEventListener('submit', ev => {
+  const form = ev.target.closest('form[data-form]');
+  if (!form) return;
+  ev.preventDefault();
+  const d = formData(form);
+  switch (form.dataset.form) {
+    case 'login': doLogin(d); break;
+    case 'register': doRegister(d); break;
+    case 'check': ui.query = clean(d.q); ui.errors = {}; ui.values = {}; render(); break;
+    case 'propose': propose(d); break;
+    case 'topic': saveTopic(d); break;
+  }
+});
+
+document.addEventListener('input', ev => {
+  const t = ev.target;
+  if (t.dataset.filter) filterTable(t.dataset.filter);
+});
+document.addEventListener('change', ev => {
+  const t = ev.target;
+  if (t.dataset.statusFilter) filterTable(t.dataset.statusFilter);
+  if (t.dataset.actChange === 'status') document.getElementById('assignField').style.visibility = t.value === 'Selected' ? 'visible' : 'hidden';
+});
+
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('button');
+  if (!el) return;
+  const ds = el.dataset;
+  if (ds.go) return go(ds.go, ds.go === 's-checker' ? { query: '' } : {});
+  if (ds.act === 'menu') { ui.menuOpen = !ui.menuOpen; document.querySelector('.sidebar')?.classList.toggle('open', ui.menuOpen); return; }
+  if (ds.act === 'logout') { db.session = null; persist(); flash('success', 'You have been logged out.'); return go('login'); }
+  if (ds.act === 'pw') { const i = el.parentElement.querySelector('input'); const h = i.type === 'password'; i.type = h ? 'text' : 'password'; el.textContent = h ? 'Hide' : 'Show'; return; }
+  if (ds.act === 'reset') return confirmBox('Reset all demo data? Every topic, request and account goes back to the sample data.', async () => { db = await seed(); persist(); flash('success', 'Demo data has been reset.'); go('login'); }, 'Reset data');
+  if (ds.fill) { document.getElementById('l-user').value = ds.fill; document.getElementById('l-pass').value = ds.fill + '123'; return; }
+  if (ds.request) return requestExisting(Number(ds.request));
+  if (ds.cancel) return confirmBox('Cancel this request?', () => {
+    const u = user(); db.requests = db.requests.filter(r => !(r.id === Number(ds.cancel) && r.student_id === u.id && r.status === 'Pending'));
+    persist(); flash('success', 'Request cancelled.'); render();
+  }, 'Cancel request');
+  if (ds.edit) { go('a-topics', { editId: Number(ds.edit) }); document.getElementById('topic-form')?.scrollIntoView(); return; }
+  if (ds.release) return confirmBox('Release this topic and make it Available again?', () => {
+    const t = db.topics.find(x => x.id === Number(ds.release)); Object.assign(t, { status: 'Available', assigned_to: null, updated_at: now() });
+    persist(); flash('success', 'Topic released and marked as Available.'); go('a-topics');
+  }, 'Release', false);
+  if (ds.delete) return confirmBox('Delete this topic permanently?', () => {
+    const id = Number(ds.delete); db.topics = db.topics.filter(t => t.id !== id);
+    db.requests.forEach(r => { if (r.topic_id === id) r.topic_id = null; });
+    persist(); flash('success', 'Topic deleted.'); go('a-topics');
+  }, 'Delete');
+  if (ds.rfilter) { ui.reqFilter = ds.rfilter; return render(); }
+  if (ds.approve) return approve(Number(ds.approve));
+  if (ds.reject) return reject(Number(ds.reject));
+  if (ds.delstudent) return confirmBox('Delete this student account? Their topic will become Available.', () => {
+    const id = Number(ds.delstudent);
+    db.topics.forEach(t => { if (t.assigned_to === id) Object.assign(t, { status: 'Available', assigned_to: null, updated_at: now() }); });
+    db.requests = db.requests.filter(r => r.student_id !== id);
+    db.users = db.users.filter(u => !(u.id === id && u.role === 'student'));
+    persist(); flash('success', 'Student removed and their topic (if any) is Available again.'); go('a-students');
+  }, 'Delete');
+  if (ds.copycsv) {
+    const text = csvFor(ds.copycsv);
+    const done = () => { flash('success', 'CSV copied. Paste it into Excel or Google Sheets.'); render(); };
+    navigator.clipboard?.writeText(text).then(done).catch(() => { flash('info', 'Copy is blocked here. Select the table and copy it instead.'); render(); });
+    if (!navigator.clipboard) { flash('info', 'Copy is blocked here. Select the table and copy it instead.'); render(); }
+  }
+});
+
+/* ---------- Start ---------- */
+(async function start() {
+  db = restore() || await seed();
+  persist();
+  const u = user();
+  ui.view = u ? (u.role === 'admin' ? 'a-dash' : 's-dash') : 'login';
+  render();
+})();
+</script>

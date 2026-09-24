@@ -1,0 +1,10 @@
+# Render.com Blueprint: New > Blueprint > select this repository
+services:
+  - type: web
+    name: project-topic-checker
+    runtime: docker
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: PTC_DB_DRIVER
+        value: sqlite

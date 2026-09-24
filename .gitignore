@@ -1,0 +1,4 @@
+# Portable PHP (large, only needed for START.bat on Windows)
+_tools/
+# Local SQLite database
+data/
